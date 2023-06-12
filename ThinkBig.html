@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ThinkBIG</title>
+    <style>
+        #wrapper {
+            width: 1100px;
+            height: 900px;
+            margin: auto;
+            background: whitesmoke;
+        }
+
+        #content {
+            width: 900px;
+            height: 100%;
+            float: left;
+            background: whitesmoke;
+            position: relative;
+        }
+
+        #side {
+            width: 200px;
+            height: 100%;
+            float: left;
+            background: lemonchiffon;
+            text-align: center;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        #score {
+            width: 90%;
+            font-size: 40px;
+            font-weight: bold;
+            margin-top: 30px;
+        }
+
+        #side input {
+            width: 90%;
+            height: 50px;
+            font-size: 40px;
+            margin-top: 30px;
+        }
+
+        #side h1 {
+            width: 90%;
+            margin-top: 30px;
+        }
+
+        #game_theme1 {
+            width: 80%;
+            margin-top: 30px;
+        }
+
+        #game_theme2 {
+            width: 80%;
+            margin-top: 10px;
+        }
+
+        #timer {
+            width: 90%;
+            font-size: 40px;
+            margin-top: 30px;
+            text-align: center;
+            position: absolute;
+            top: 500px;
+        }
+    </style>
+    <script src="./Box.js"></script>
+    <script>
+        let content;
+        let side;
+        let box;
+
+        function moveX(){
+            
+        }
+        
+        //이미지 붙이기
+        function createGameContent() {
+            let img = document.createElement("img");
+            img.src = "./images/leejaeyong.png";
+            img.style.width = 900 + "px";
+            img.style.height = 900 + "px";
+            
+            box.appendChild(img);
+        }
+
+        //덮어 씌울 셀 아홉개 만들기
+        function createBox() {
+            box=document.createElement("div");
+            box.style.width=300+"px";
+            box.style.height=300+"px";
+            box.style.position="absolute";
+            box.style.left=0+"px";
+            box.style.top=0+"px";
+            box.style.overflow="hidden";
+
+            content.appendChild(box);
+            createGameContent()
+        }
+
+        function init() {
+            content = document.getElementById("content");
+            side = document.getElementById("side");
+        }
+
+        addEventListener("load", function () {
+            init();
+            createBox();
+            //setInterval("move()", 10);
+
+            box.addEventListener("keydown", function(e){
+                switch(e.keyCode){
+                    case 37: moveX(-300); break;
+                    case 39: moveX(300); break;
+                    case 38: moveY(-300); break;
+                    case 40: moveY(300); break;
+                }
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <div id="wrapper">
+        <div id="content"></div>
+        <div id="side">
+            <div id="score">00점</div>
+            <h1>Stage1</h1>
+            <button id="game_theme1">인물</button>
+            <button id="game_theme2">음식</button>
+            <input type="text">
+            <div id="timer">45:00</div>
+        </div>
+    </div>
+</body>
+
+</html>
