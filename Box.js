@@ -12,6 +12,7 @@ class Box{
         this.div.style.width=this.width+"px";
         this.div.style.height=this.height+"px";
         this.div.style.background="whitesmoke";
+        this.div.style.overflow="hidden";
 
         this.div.style.position="absolute";
         this.div.style.left=this.x+"px";

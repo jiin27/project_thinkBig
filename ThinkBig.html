@@ -74,53 +74,81 @@
         let content;
         let side;
         let box;
+        let boxArray = [];
+        let indexX = 0; //배열을 접근하기 위한 호수
+        let indexY = 0; //배열을 접근하기 위한 층수
 
-        function moveX(){
-            
+        function move(){
+            if(indexX<0){
+                indexX=0;
+            }else if(indexX>boxArray[0].length){
+                indexX=boxArray[0].length-1;
+            }
+
+            if(indexY<0){
+                indexY=0;
+            }else if(indexY>boxArray.length){
+                indexY=boxArray.length-1;
+            }
+
+            for (let a=0; a<boxArray.length; a++) {
+                for (let i=0; i<boxArray[a].length; i++) {
+                    if (indexY == a && indexX == i) {
+                        boxArray[a][i].div.style.opacity = 0;
+                    } else if (i != indexX || a != indexY) {
+                        boxArray[a][i].div.style.opacity = 1;
+                    }
+                }
+            }
         }
-        
+
         //이미지 붙이기
         function createGameContent() {
             let img = document.createElement("img");
             img.src = "./images/leejaeyong.png";
             img.style.width = 900 + "px";
             img.style.height = 900 + "px";
-            
-            box.appendChild(img);
+
+            content.appendChild(img);
         }
 
         //덮어 씌울 셀 아홉개 만들기
         function createBox() {
-            box=document.createElement("div");
-            box.style.width=300+"px";
-            box.style.height=300+"px";
-            box.style.position="absolute";
-            box.style.left=0+"px";
-            box.style.top=0+"px";
-            box.style.overflow="hidden";
 
-            content.appendChild(box);
-            createGameContent()
+            for (let a = 0; a < 3; a++) {
+                let arr = new Array(3);
+                for (let i = 0; i < arr.length; i++) {
+                    //(container, width, height, x, y)
+                    box = new Box(content, 300, 300, i * 300, a * 300);
+                    arr[i] = box;
+                }
+                boxArray.push(arr);
+            }
         }
 
         function init() {
             content = document.getElementById("content");
             side = document.getElementById("side");
+            createGameContent();
         }
 
         addEventListener("load", function () {
             init();
             createBox();
-            //setInterval("move()", 10);
 
-            box.addEventListener("keydown", function(e){
-                switch(e.keyCode){
-                    case 37: moveX(-300); break;
-                    case 39: moveX(300); break;
-                    case 38: moveY(-300); break;
-                    case 40: moveY(300); break;
+            //버튼을 누르면, 배열의 다음 div의 style.opacity가 0으로.
+
+            document.body.addEventListener("keydown", function (e) {
+                switch (e.keyCode) {
+                    case 37: move(); break;
+                    case 39: move(); break;
+                    case 38: move(); break;
+                    case 40: move(); break;
                 }
+
             });
+
+
         });
     </script>
 </head>
