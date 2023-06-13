@@ -60,7 +60,7 @@
             height: 35px;
         }
 
-        #start_bt{
+        #start_bt {
             width: 50%;
             height: 35px;
             margin-top: 20px;
@@ -92,6 +92,7 @@
         let score;
         let input;
         let stage;
+        let timer;
         let boxArray = [];
         let secondBoxArray = [];
         let thirdBoxArray = [];
@@ -99,14 +100,16 @@
         let indexY = 0; //배열을 접근하기 위한 층수
         let n = -1;
         let s = 0;
-        let sec=30;
+        let t = 10;
+        let sec = 31;
         let st;
+        let imgArray = [];
         let foodArray = [
             ["./images/food/pancake.jpg", "팬케이크"],
             ["./images/food/hamburger.jpg", "햄버거"],
             ["./images/food/ramen.jpg", "라멘"],
             ["./images/food/potato.jpg", "감자튀김"],
-            ["./images/food/sushi.jpg", "스시"],
+            ["./images/food/sushi.jpg", "초밥"],
             ["./images/food/chickensoup.jpg", "삼계탕"],
             ["./images/food/tteokbokki.jpg", "떡볶이"],
             ["./images/food/coldnoodle.jpg", "냉면"],
@@ -124,7 +127,11 @@
             if (input.value == foodArray[n][1]) {
                 input.value = "";
                 setScore();
+                t--;
+                imgArray[t].style.transform = "rotate(75deg)";
+                killTimeOut();
                 createGameContent();
+                next();
             } else {
                 input.value = "";
                 input.focus();
@@ -133,16 +140,13 @@
         }
 
         function move() {
-
-            let box=boxArray[indexY][indexX];
-            box.showHide(); 
-
-
+            let box = boxArray[indexY][indexX];
+            box.showHide();
         }
 
-        function removeArray(){
-            for(let a=0; a<boxArray.length; a++){
-                for(let i=0; i<boxArray[a].length; i++){
+        function removeArray() {
+            for (let a = 0; a < boxArray.length; a++) {
+                for (let i = 0; i < boxArray[a].length; i++) {
                     content.removeChild(boxArray[a][i].div);
                 }
             }
@@ -154,26 +158,26 @@
             n++;
             pic.src = foodArray[n][0];
 
-            if (n > 3 && n<=6) {
-                if(n==4){
+            if (n > 3 && n <= 6) {
+                if (n == 4) {
                     alert("Stage1 클리어!");
                 }
-                stage.innerText="Stage"+2;
+                stage.innerText = "Stage" + 2;
                 removeArray();
-                boxArray.length=0;
+                boxArray.length = 0;
                 createSecondBox();
-            } else if (n > 6 && n<=9) {
-                if(n==7){
+            } else if (n > 6 && n <= 9) {
+                if (n == 7) {
                     alert("Stage2 클리어!");
                 }
-                stage.innerText="Stage"+3;
+                stage.innerText = "Stage" + 3;
                 removeArray();
-                boxArray.length=0;
+                boxArray.length = 0;
                 createThirdBox();
-            }else if(n>9){
+            } else if (n > 9) {
                 removeArray();
-                boxArray.length=0;
-                pic.src="./images/stageclear.jpg";
+                boxArray.length = 0;
+                pic.src = "./images/stageclear.jpg";
             }
         }
 
@@ -188,7 +192,6 @@
                 }
                 boxArray.push(arr);
             }
-
         }
 
         function createSecondBox() {
@@ -211,60 +214,61 @@
                 }
                 boxArray.push(arr);
             }
-
         }
 
         //타임아웃이 시작되는 경우
         //1) 스타트 버튼 눌렀을때
         //2) 답을 맞췄을 때
         //3) 30초가 종료되고 다음 문제 나오기 직전.
-        function next(){
-            st=setInterval("timeCheck()", 500);
+        function next() {
+            st = setInterval("timeCheck()", 1000);
             setPosX(indexX);
             setPosY(indexY);
             move();
         }
 
-        
-        function setPosX(x){
+
+        function setPosX(x) {
             //indexX는 호수를 넘어설 수 없다.
-            if((indexX+x)<=boxArray[0].length-1){
-                indexX+=x;
+            if ((indexX + x) <= boxArray[0].length - 1) {
+                indexX += x;
             }
-            if((indexX+x)<0){
-                indexX=0;
+            if ((indexX + x) < 0) {
+                indexX = 0;
             }
-            console.log(indexX, indexY);             
+            console.log(indexX, indexY);
         }
 
-        function setPosY(y){
+        function setPosY(y) {
             //indexY는 층수를 넘어설 수 없다.
-            if((indexY+y)<=boxArray.length-1){
-                indexY+=y;
+            if ((indexY + y) <= boxArray.length - 1) {
+                indexY += y;
             }
-            if((indexY+y)<0){
-                indexY=0;
+            if ((indexY + y) < 0) {
+                indexY = 0;
             }
-            console.log(indexX, indexY);             
+            console.log(indexX, indexY);
 
         }
 
         //setInt() 종료시켜야하는 경우
         //1) 문제를 맞췄을 때
         //2) 타임아웃 되면
-        function killTimeOut(){
+        function killTimeOut() {
             clearTimeout(st);
-            sec=0;
-            timeCheck();
+            sec = 30;
         }
 
-        function timeCheck(){
+        function timeCheck() {
             sec--;
-            let timer=document.getElementById("timer");
-            timer.innerText=sec;
+            timer = document.getElementById("timer");
+            timer.innerText = sec;
+            if(sec<=0){
+                killTimeOut();
+            }
         }
 
-        function start(){
+        function start() {
             next();
         }
 
@@ -273,21 +277,22 @@
             side = document.getElementById("side");
             input = document.querySelector("input");
             score = document.getElementById("score");
-            stage=document.querySelector("h1");
+            stage = document.querySelector("h1");
+            imgArray = document.querySelectorAll("#side img");
         }
 
         addEventListener("load", function () {
             init();
             createGameContent();
             createFirstBox();
-            
+
 
             //버튼을 누르면, 배열의 다음 div의 style.opacity가 0으로.
             document.body.addEventListener("keydown", function (e) {
                 switch (e.keyCode) {
                     case 37: setPosX(-1); break;
                     case 39: setPosX(1); break;
-                    case 38: setPosY(-1);break;
+                    case 38: setPosY(-1); break;
                     case 40: setPosY(1); break;
                 }
                 move();
@@ -314,7 +319,7 @@
             <img src="./images/pin.png"><img src="./images/pin.png"></br>
             <img src="./images/pin.png"><img src="./images/pin.png"><img src="./images/pin.png"></br>
             <img src="./images/pin.png"><img src="./images/pin.png"><img src="./images/pin.png"><img
-            src="./images/pin.png">
+                src="./images/pin.png">
             <button id="start_bt" onClick="start()">Start</button>
             <button id="game_theme1">인물</button>
             <button id="game_theme2">음식</button>
