@@ -21,6 +21,11 @@
             position: relative;
         }
 
+        #pic {
+            width: 100%;
+            height: 100%;
+        }
+
         #side {
             width: 200px;
             height: 100%;
@@ -50,9 +55,22 @@
             margin-top: 30px;
         }
 
+        #side img {
+            width: 35px;
+            height: 35px;
+        }
+
+        #start_bt{
+            width: 50%;
+            height: 35px;
+            margin-top: 20px;
+            border-radius: 20%;
+            background: lavender;
+        }
+
         #game_theme1 {
             width: 80%;
-            margin-top: 30px;
+            margin-top: 40px;
         }
 
         #game_theme2 {
@@ -61,38 +79,72 @@
         }
 
         #timer {
-            width: 90%;
-            font-size: 40px;
-            margin-top: 30px;
+            width: 50%;
+            font-size: 45px;
             text-align: center;
-            position: absolute;
-            top: 500px;
+            margin-top: 30px;
         }
     </style>
     <script src="./Box.js"></script>
     <script>
         let content;
         let side;
-        let box;
+        let score;
+        let input;
+        let stage;
         let boxArray = [];
-        let indexX = 0; //배열을 접근하기 위한 호수
-        let indexY = 0; //배열을 접근하기 위한 층수
+        let secondBoxArray = [];
+        let thirdBoxArray = [];
+        let indexX = -1; //배열을 접근하기 위한 호수
+        let indexY = -1; //배열을 접근하기 위한 층수
+        let n = -1;
+        let s = 0;
+        let sec=30;
+        let st;
+        let foodArray = [
+            ["./images/food/pancake.jpg", "팬케이크"],
+            ["./images/food/hamburger.jpg", "햄버거"],
+            ["./images/food/ramen.jpg", "라멘"],
+            ["./images/food/potato.jpg", "감자튀김"],
+            ["./images/food/sushi.jpg", "스시"],
+            ["./images/food/chickensoup.jpg", "삼계탕"],
+            ["./images/food/tteokbokki.jpg", "떡볶이"],
+            ["./images/food/coldnoodle.jpg", "냉면"],
+            ["./images/food/hotteok.jpg", "호떡"],
+            ["./images/food/pizza.jpg", "피자"]
+        ];
 
-        function move(){
-            if(indexX<0){
-                indexX=0;
-            }else if(indexX>boxArray[0].length){
-                indexX=boxArray[0].length-1;
+
+        function setScore() {
+            s += 10;
+            score.innerText = s + "점";
+        }
+
+        function checkAnswer() {
+            if (input.value == foodArray[n][1]) {
+                input.value = "";
+                setScore();
+                createGameContent();
+            } else {
+                input.value = "";
+                input.focus();
             }
 
-            if(indexY<0){
-                indexY=0;
-            }else if(indexY>boxArray.length){
-                indexY=boxArray.length-1;
+        }
+
+        function move() {
+            if (indexX < 0) {
+                indexX = 0;
+            } else if (indexY < 0) {
+                indexY = 0;
+            } else if (indexX > boxArray[0].length - 1) {
+                indexX = boxArray[0].length - 1;
+            } else if (indexY > boxArray.length - 1) {
+                indexY = boxArray.length - 1;
             }
 
-            for (let a=0; a<boxArray.length; a++) {
-                for (let i=0; i<boxArray[a].length; i++) {
+            for (let a = 0; a < boxArray.length; a++) {
+                for (let i = 0; i < boxArray[a].length; i++) {
                     if (indexY == a && indexX == i) {
                         boxArray[a][i].div.style.opacity = 0;
                     } else if (i != indexX || a != indexY) {
@@ -102,52 +154,132 @@
             }
         }
 
+        function removeArray(){
+            for(let a=0; a<boxArray.length; a++){
+                for(let i=0; i<boxArray[a].length; i++){
+                    content.removeChild(boxArray[a][i].div);
+                }
+            }
+        }
+
         //이미지 붙이기
         function createGameContent() {
-            let img = document.createElement("img");
-            img.src = "./images/leejaeyong.png";
-            img.style.width = 900 + "px";
-            img.style.height = 900 + "px";
+            //(container, src)
+            n++;
+            pic.src = foodArray[n][0];
 
-            content.appendChild(img);
+            if (n > 3 && n<=6) {
+                if(n==4){
+                    alert("Stage1 클리어!");
+                }
+                stage.innerText="Stage"+2;
+                removeArray();
+                boxArray.length=0;
+                createSecondBox();
+            } else if (n > 6 && n<=9) {
+                if(n==7){
+                    alert("Stage2 클리어!");
+                }
+                stage.innerText="Stage"+3;
+                removeArray();
+                boxArray.length=0;
+                createThirdBox();
+            }else if(n>9){
+                removeArray();
+                boxArray.length=0;
+                pic.src="./images/stageclear.jpg";
+            }
         }
 
         //덮어 씌울 셀 아홉개 만들기
-        function createBox() {
-
+        function createFirstBox() {
             for (let a = 0; a < 3; a++) {
                 let arr = new Array(3);
                 for (let i = 0; i < arr.length; i++) {
                     //(container, width, height, x, y)
-                    box = new Box(content, 300, 300, i * 300, a * 300);
+                    let box = new Box(content, 300, 300, i * 300, a * 300);
+                    arr[i] = box;
+                }
+                boxArray.push(arr);
+            }
+
+        }
+
+        function createSecondBox() {
+            for (let a = 0; a < 4; a++) {
+                let arr = new Array(4);
+                for (let i = 0; i < arr.length; i++) {
+                    let box = new Box(content, 225, 225, i * 225, a * 225);
                     arr[i] = box;
                 }
                 boxArray.push(arr);
             }
         }
 
+        function createThirdBox() {
+            for (let a = 0; a < 5; a++) {
+                let arr = new Array(5);
+                for (let i = 0; i < arr.length; i++) {
+                    let box = new Box(content, 180, 180, i * 180, a * 180);
+                    arr[i] = box;
+                }
+                boxArray.push(arr);
+            }
+
+        }
+
+        //타임아웃이 시작되는 경우
+        //1) 스타트 버튼 눌렀을때
+        //2) 답을 맞췄을 때
+        //3) 30초가 종료되고 다음 문제 나오기 직전.
+        function next(){
+            st=setInterval("timeCheck()", 1000);
+        }
+
+        //setInt() 종료시켜야하는 경우
+        //1) 문제를 맞췄을 때
+        //2) 타임아웃 되면
+        function killTimeOut(){
+            clearTimeout(st);
+            sec=0;
+            timeCheck();
+        }
+
+        function timeCheck(){
+            sec--;
+            let timer=document.getElementById("timer");
+            timer.innerText=sec;
+        }
+
         function init() {
             content = document.getElementById("content");
             side = document.getElementById("side");
-            createGameContent();
+            input = document.querySelector("input");
+            score = document.getElementById("score");
+            stage=document.querySelector("h1");
         }
 
         addEventListener("load", function () {
             init();
-            createBox();
+            createGameContent();
+            createFirstBox();
+            
 
             //버튼을 누르면, 배열의 다음 div의 style.opacity가 0으로.
-
             document.body.addEventListener("keydown", function (e) {
                 switch (e.keyCode) {
-                    case 37: move(); break;
-                    case 39: move(); break;
-                    case 38: move(); break;
-                    case 40: move(); break;
+                    case 37: indexX -= 1; break;
+                    case 39: indexX += 1; break;
+                    case 38: indexY -= 1; break;
+                    case 40: indexY += 1; break;
                 }
-
+                move();
             });
-
+            input.addEventListener("keydown", function (e) {
+                if (e.keyCode == 13) {
+                    checkAnswer();
+                }
+            });
 
         });
     </script>
@@ -155,14 +287,22 @@
 
 <body>
     <div id="wrapper">
-        <div id="content"></div>
+        <div id="content">
+            <img id="pic">
+        </div>
         <div id="side">
             <div id="score">00점</div>
             <h1>Stage1</h1>
+            <img src="./images/pin.png"></br>
+            <img src="./images/pin.png"><img src="./images/pin.png"></br>
+            <img src="./images/pin.png"><img src="./images/pin.png"><img src="./images/pin.png"></br>
+            <img src="./images/pin.png"><img src="./images/pin.png"><img src="./images/pin.png"><img
+            src="./images/pin.png">
+            <button id="start_bt">Start</button>
             <button id="game_theme1">인물</button>
             <button id="game_theme2">음식</button>
             <input type="text">
-            <div id="timer">45:00</div>
+            <div type="text" value="30" id="timer"></div>
         </div>
     </div>
 </body>
