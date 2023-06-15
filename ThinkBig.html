@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ThinkBIG</title>
+    <style>
+        #wrapper {
+            width: 1200px;
+            height: 1000px;
+            margin: auto;
+            background: whitesmoke;
+        }
+
+        #content {
+            width: 1000px;
+            height: 100%;
+            float: left;
+            background: whitesmoke;
+            position: relative;
+        }
+
+        #pic {
+            width: 100%;
+            height: 100%;
+        }
+
+        #side {
+            width: 200px;
+            height: 100%;
+            float: left;
+            background: lemonchiffon;
+            text-align: center;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        #score {
+            width: 90%;
+            font-size: 40px;
+            font-weight: bold;
+            margin-top: 30px;
+        }
+
+        #answer {
+            width: 90%;
+            height: 50px;
+            font-size: 40px;
+            margin-top: 30px;
+        }
+
+        #side h1 {
+            width: 90%;
+            margin-top: 30px;
+        }
+
+        #side img {
+            width: 35px;
+            height: 35px;
+        }
+
+        #start_bt {
+            width: 50%;
+            height: 35px;
+            margin-top: 20px;
+            border-radius: 20%;
+            background: lavender;
+        }
+
+        #timer {
+            width: 90%;
+            font-size: 45px;
+            margin-top: 30px;
+            text-align: center;
+            border: none;
+            background-color: lemonchiffon;
+            box-sizing: border-box;
+        }
+
+        #theme_p {
+            margin-top: 20px;
+            margin-right: 10px;
+        }
+
+        #theme_f {
+            margin-top: 20px;
+        }
+    </style>
+    <script src="./Box.js"></script>
+    <script src="./GameTheme.js"></script>
+    <script>
+        let content;
+        let side;
+        let score;
+        let input;
+        let stage;
+        let timer;
+        let theme_p;
+        let theme_f;
+        let level1;
+        let level2;
+        let level3;
+        let boxArray = [];
+        let secondBoxArray = [];
+        let thirdBoxArray = [];
+        let indexX = 0; //배열을 접근하기 위한 호수
+        let indexY = 0; //배열을 접근하기 위한 층수
+        let n = -1;
+        let s = 0;
+        let t = 9;
+        let k;
+        let sec = 31;
+        let st;
+        let imgArray = [];
+        let stageArray = [];
+
+
+
+        function setScore() {
+            s += 10;
+            score.innerText = s + "점";
+        }
+
+        function checkAnswer() {
+            //인물 테마일 경우
+            if(input.value==stageArray[0][n].name){
+                input.value = "";
+                setScore();
+                imgArray[t].style.transform = "rotate(75deg)";
+                t--;
+                killTimeOut();
+                next();
+            }else{
+                input.value = "";
+                input.focus();
+            }
+
+            //음식 테마일 경우
+            // if(input.value==stageArray[1][n].name){
+            //     input.value = "";
+            //     setScore();
+            //     imgArray[t].style.transform = "rotate(75deg)";
+            //     t--;
+            //     killTimeOut();
+            //     createGameContent();
+            //     next();
+            // }else{
+            //     input.value = "";
+            //     input.focus();
+            // }
+        }
+
+        function move() {
+            let box = boxArray[indexY][indexX];
+            box.showHide();
+        }
+
+        function removeArray() {
+            for (let a = 0; a < boxArray.length; a++) {
+                for (let i = 0; i < boxArray[a].length; i++) {
+                    content.removeChild(boxArray[a][i].div);
+                }
+            }
+        }
+
+        function createThemePeople() {
+            pic.src = stageArray[0][n].src;
+        }
+
+        // function createThemeFood() {
+        //     pic.src = stageArray[1][n].src;
+        // }
+
+        //이미지 붙이기
+        function createGameContent() {    
+            n++; 
+            
+            if(n<=3){
+                createFirstLevel();
+            }else if (n <= 6) {
+                if (n == 4) {
+                    alert("Level1 클리어!");
+                }
+                stage.innerText = "Level" + 2;
+                removeArray();
+                boxArray.length = 0;
+                createSecondLevel();
+            } else if (n<= 9) {
+                if (n == 7) {
+                    alert("Level2 클리어!");
+                }
+                stage.innerText = "Level" + 3;
+                removeArray();
+                boxArray.length = 0;
+                createThirdLevel();
+            }
+        }
+
+        //덮어 씌울 셀 아홉개 만들기
+        function createFirstLevel() {
+            for (let a = 0; a < 4; a++) {
+                let arr = new Array(4);
+                for (let i = 0; i < arr.length; i++) {
+                    let box = new Box(content, 1000 / 4, 1000 / 4, i * (1000 / 4), a * (1000 / 4));
+                    arr[i] = box;
+                }
+                boxArray.push(arr);
+            }
+        }
+
+        function createSecondLevel() {
+            for (let a = 0; a < 5; a++) {
+                let arr = new Array(5);
+                for (let i = 0; i < arr.length; i++) {
+                    let box = new Box(content, 1000 / 5, 1000 / 5, i * (1000 / 5), a * (1000 / 5));
+                    arr[i] = box;
+                }
+                boxArray.push(arr);
+            }
+        }
+
+        function createThirdLevel() {
+            for (let a = 0; a < 8; a++) {
+                let arr = new Array(8);
+                for (let i = 0; i < arr.length; i++) {
+                    let box = new Box(content, 1000 / 8, 1000 / 8, i * (1000 / 8), a * (1000 / 8));
+                    arr[i] = box;
+                }
+                boxArray.push(arr);
+            }
+        }
+
+        //타임아웃이 시작되는 경우
+        //1) 스타트 버튼 눌렀을때
+        //2) 답을 맞췄을 때
+        //3) 30초가 종료되고 다음 문제 나오기 직전.
+        function next() {
+            st = setInterval("timeCheck()", 500);
+            setPosX(indexX);
+            setPosY(indexY);
+            move();
+        }
+
+
+        function setPosX(x) {
+            //indexX는 호수를 넘어설 수 없다.
+            if ((indexX + x) <= boxArray[0].length - 1) {
+                indexX += x;
+            }
+            if ((indexX + x) < 0) {
+                indexX = 0;
+            }
+            //console.log(indexX, indexY);
+        }
+
+        function setPosY(y) {
+            //indexY는 층수를 넘어설 수 없다.
+            if ((indexY + y) <= boxArray.length - 1) {
+                indexY += y;
+            }
+            if ((indexY + y) < 0) {
+                indexY = 0;
+            }
+            //console.log(indexX, indexY);
+
+        }
+
+        //setInt() 종료시켜야하는 경우
+        //1) 문제를 맞췄을 때
+        //2) 타임아웃 되면
+        function killTimeOut() {
+            clearTimeout(st);
+            sec = 30;
+        }
+
+        function timeCheck() {
+            sec--;
+            timer = document.getElementById("timer");
+            timer.value = "00:" + sec;
+            if (sec < 10) {
+                timer.value = "00:0" + sec;
+            }
+            if (sec <= 0) {
+                timer.value = "00:00";
+            }
+        }
+
+        function start() {
+            next();
+        }
+
+        function init() {
+            content = document.getElementById("content");
+            side = document.getElementById("side");
+            input = document.querySelector("input");
+            score = document.getElementById("score");
+            stage = document.querySelector("h1");
+            imgArray = document.querySelectorAll("#side img");
+            theme_p = document.getElementById("theme_p");
+            theme_f = document.getElementById("theme_f");
+            level1 = document.getElementById("level1");
+            level2 = document.getElementById("level2");
+            level3 = document.getElementById("level3");
+
+            stageArray.push(gameThemePeople);
+            stageArray.push(gameThemeFood);
+        }
+
+        addEventListener("load", function () {
+            init();
+            createGameContent();
+            createThemePeople();
+            
+            //createThemeFood();
+
+            //버튼을 누르면, 배열의 다음 div의 style.opacity가 0으로.
+            document.body.addEventListener("keydown", function (e) {
+                switch (e.keyCode) {
+                    case 37: setPosX(-1); break;
+                    case 39: setPosX(1); break;
+                    case 38: setPosY(-1); break;
+                    case 40: setPosY(1); break;
+                }
+                move();
+            });
+
+            input.addEventListener("keydown", function (e) {
+                if (e.keyCode == 13) {
+                    checkAnswer();
+                }
+            });
+
+        });
+    </script>
+</head>
+
+<body>
+    <div id="wrapper">
+        <div id="content">
+            <img id="pic">
+        </div>
+        <div id="side">
+            <div id="score">00점</div>
+            <h1>Level</h1>
+            <img src="./images/pin.png"></br>
+            <img src="./images/pin.png"><img src="./images/pin.png"></br>
+            <img src="./images/pin.png"><img src="./images/pin.png"><img src="./images/pin.png"></br>
+            <img src="./images/pin.png"><img src="./images/pin.png"><img src="./images/pin.png"><img
+                src="./images/pin.png">
+                <!-- <div>
+                    <button id="theme_p" onClick="createThemePeople()">인물
+                    <button id="theme_f" onClick="createThemeFood()">음식
+                </div> -->
+            <button id="start_bt" onClick="start()">Start</button>
+            <input type="text" id="answer">
+            <input type="text" value="00:30" id="timer">
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #wrapper {
+            width: 1100px;
+            height: 900px;
+            background: whitesmoke;
+            margin: auto;
+        }
+
+        #stage {
+            width: 900px;
+            height: 100%;
+            background-repeat: no-repeat;
+            float: left;
+            position: relative;
+
+        }
+
+        #side {
+            width: 200px;
+            height: 100%;
+            background: rgb(198, 232, 245);
+            float: left;
+            text-align: center;
+        }
+
+        h1,
+        h2 {
+            text-align: center;
+        }
+
+        #hpBox {
+            width: 100%;
+            height: 200px;
+            background: gainsboro;
+        }
+
+        #selectLevel {
+            width: 90%;
+            margin-top: 20px;
+        }
+
+        #side button,
+        #side input[type='text'] {
+            width: 90%;
+            height: 45px;
+            margin-top: 20px;
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        #timeBox {
+            width: 100%;
+            height: 95px;
+            background: none;
+            margin-top: 20px;
+            font-size: 55px;
+            font-weight: bold;
+        }
+    </style>
+    <script src="../js/lib.js"></script>
+    <script src="./Rect.js"></script>
+    <script src="./data.js"></script>
+    <script>
+        let stage;
+        let selectLevel;
+        let level = 1; //게임의 레벨을 위한 변수, 레벨이 올라갈때마다 1씩 증가시킬 예정
+        let rectCount=3; // level이 올라갈때마다 rectCount++
+        let cursorX = 0;  //키보드를 움직일때 배열의 호수 좌표를 결정짓는 변수,  최초에 좌측 상단 사각형이 선택되어 잇어야 하므로 0 
+        let cursorY = 0;  //키보드를 움직일때 배열의 층수 좌표를 결정짓는 변수, 최초에 좌측 상단 사각형이 선택되어 잇어야 하므로 0 
+
+        let per_width;//사각형 당 너비
+        let per_height;//사각형 당 높이
+        let rectArray = []; //사각형 객체를 담게될 이차원배열
+        let sec = 30;//타이머에 사용될 카운터 변수        
+        let timeBox; //타이머가 출력될 div
+        let timeFlag = false; //타이머를 작동시킬 논리값
+        let keyword; //input 박스
+        let imgIndex = -1; //현재 사용자가 보고 있는 배열의 이미지 index 
+
+
+        function getLevelNum() {
+            rectCount = parseInt(selectLevel.value);
+        }
+
+        /*----------------------------------------------------
+        이미지를 가리게 될 사각형을 생성한다.
+        1) level이 1증가될 수록 사각형의 수 및 사각형의 width, height도 비례하여 
+            변할 수 있도록  처리  
+            ex) level 0 일때 3x3개의 width가 300인 사각형 생성 
+            ex) level 1 일때 4x4개의 width가 225인 사각형 생성 
+            ex) level 2 일때 5x5개의 width가 180인 사각형 생성 
+        ----------------------------------------------------*/
+        function createRect() {
+            
+            resultCount = level + rectCount; //계산된 사각형의 개수
+
+            let w = parseInt(stage.style.width); //stage의 너비
+            let h = parseInt(stage.style.height); //stage의 높이
+
+            //너비와 높이에 따른 사각형의 크기 계산 
+            per_width = w / resultCount;
+            per_height = h / resultCount;
+
+            for (let a = 0; a < resultCount; a++) {
+
+                let arr = new Array(resultCount);
+
+                for (let i = 0; i < resultCount; i++) {
+                    //constructor(container, width, height, x, y, velX, velY,targetX, targetY, op, targetOp){
+                    targetOp = 1;
+                    if (a == 0 && i == 0) {
+                        targetOp = 0.1;
+                    } else {
+                        targetOp = 1;
+                    }
+                    let rect = new Rect(stage, per_width, per_height, -300, -300, 1, 1, i * per_width, a * per_height, 1, targetOp);
+                    arr[i] = rect;
+                }
+                rectArray.push(arr);
+            }
+        }
+
+        /*----------------------------------------------------
+        사각형들을 감속도 에니메이션 효과로 등장/사라지게 하는 함수
+        ----------------------------------------------------*/
+        function hideEffect() {
+            //사각형 수만큼 반복문으로 tick(), render()
+            for (let a = 0; a < rectArray.length; a++) { //층수
+                for (let i = 0; i < rectArray[a].length; i++) {//호수
+                    rectArray[a][i].targetX = -500;
+                    rectArray[a][i].targetY = -500;
+                }
+            }
+        }
+
+        function showEffect() {
+            //사각형 수만큼 반복문으로 tick(), render()
+            for (let a = 0; a < rectArray.length; a++) { //층수
+                for (let i = 0; i < rectArray[a].length; i++) {//호수
+                    rectArray[a][i].targetX = i * per_width;
+                    rectArray[a][i].targetY = a * per_height;
+                }
+            }
+        }
+
+        /*----------------------------------------------------
+        게임 level에 따른 배열을 접근하여, 이중 어떤 이미지를 등장시킬지 랜덤하게 선택한다
+        ----------------------------------------------------*/
+        function getPicture() {
+            let currentArray = answerArray[level];
+
+            //어떤 이미지를 접근할지를 결정짓는 랜덤값, 전역변수로 빼놓아야, 아래 쪽에서 정답 맞출때 사용할 수 있다.
+            imgIndex++;
+            stage.style.backgroundImage = "url(./images/pic/" + currentArray[imgIndex].image + ")";
+        }
+
+
+        /*----------------------------------------------------
+        커서 움직일 때마다 x좌표를 변경해주는 함수
+        1) 해단 좌표의 사각형을 접근하기 위한 getDataAtIndex() 를 호출한다
+        ----------------------------------------------------*/
+        function moveX(n) {
+            cursorX += n;
+
+            if (cursorX + n < 0) { //좌측으로 못 벗어나게
+                cursorX = 0;
+            }
+            if (cursorX + n >= resultCount) { //우측으로 못 벗어나게
+                cursorX = resultCount - 1;
+            }
+            setOpacity(); //선택된 사각형 정보 얻어와 알맞는 처리를 해주는 함수 호출
+        }
+
+        /*----------------------------------------------------
+        커서 움직일 때마다 좌표를 변경해주는 함수
+        1) 해단 좌표의 사각형을 접근하기 위한 getDataAtIndex() 를 호출한다
+        ----------------------------------------------------*/
+        function moveY(n) {
+            cursorY += n;
+
+            if (cursorY + n < 0) {
+                cursorY = 0;
+            }
+            if (cursorY + n >= resultCount) { //아래쪽으로 못 벗어나게
+                cursorY = resultCount - 1;
+            }
+            setOpacity();//선택된 사각형 정보 얻어와 알맞는 처리를 해주는 함수 호출
+        }
+
+        /*----------------------------------------------------
+        커서 움직일 때마다 해당 좌표의 사각형에 접근하기 
+        1) border를 빨간색으로 
+        2) opacity를 투명하게 - 단 감속도가 적용되어 있으므로, targetOp값만 지정하면 알아서 적용됨
+        ----------------------------------------------------*/
+        function setOpacity() {
+            let rect = rectArray[cursorY][cursorX];
+
+            for (let a = 0; a < rectArray.length; a++) { 
+                for (let i = 0; i < rectArray[a].length; i++) {
+
+                    if (a == cursorY && i == cursorX) {
+                        rectArray[a][i].setBorder("lemonchiffon");
+                        rectArray[a][i].targetOp = 0;
+                    } else {
+                        rectArray[a][i].setBorder("silver");
+                        rectArray[a][i].targetOp = 1;
+                    }
+                }
+            }
+        }
+
+        /*----------------------------------------------------
+        입력한 값과 문제의 일치여부 판단
+        ----------------------------------------------------*/
+        function compare() {
+
+            let currentArray = answerArray[level]; //현재 사용중인 일차원 배열을 꺼낸다 
+
+            //현재 보고 있는 랜덤 정보와 입력한 답이 같다면.
+            if (keyword.value == currentArray[imgIndex].name) {
+                alert("정답입니다.");
+
+                keyword.value = "";
+                cursorX = 0;  //커서위치 다시 초기화
+                cursorY = 0;  //커서위치 다시 초기화
+                setOpacity(); //투명도 초기화
+                hideEffect();//다음 이미지로 진행하기 전에 사각형을 거둬들이기
+                setTimeout("showEffect()", 700); //사각형 에니메이션 보여주기
+                setTimeout("getPicture()", 1400); //이미지가 너무 빨리 등장하지 않도록, 시간차 둔다
+            }
+        }
+
+        /*----------------------------------------------------
+        타임 카운트 함수
+        1) 30초부터 1씩 감소시킨다
+        2) 우측 영역에 초를 출력한다
+        ----------------------------------------------------*/
+        function timeCount() {
+            if (timeFlag) {
+                sec--;
+                timeBox.innerText = "00:" + sec;
+            }
+            setTimeout("timeCount()", 1000);
+        }
+
+
+        /*----------------------------------------------------
+        게임 시작 버튼을 누르면 
+        1) 타이머를 작동시키기위한 논리값인 timeFlag를 true로 전환 
+        2) 30초를 세기 위한 변수를 30으로 초기화
+        ----------------------------------------------------*/
+        function startGame() {
+            timeFlag = true;
+            sec = 30;
+        }
+
+
+        function loop() {
+            //사각형 감속도 공식으로 자리잡기 처리
+            for (let a = 0; a < rectArray.length; a++) { //층수
+                for (let i = 0; i < rectArray[a].length; i++) {//호수
+                    rectArray[a][i].tick();
+                    rectArray[a][i].render();
+                }
+            }
+        }
+
+        function init() {
+            stage = document.getElementById("stage");
+            timeBox = document.getElementById("timeBox");
+            keyword = document.getElementById("keyword");
+            selectLevel = document.getElementById("selectLevel");
+
+            stage.style.width = 900 + "px";
+            stage.style.height = 900 + "px";
+            stage.style.backgroundSize = "100% 100%";
+        }
+
+        addEventListener("load", function () {
+            init();
+
+            createRect(); //사각형 생성하기
+            setTimeout("getPicture()", 700);
+            timeCount(); // 시간제한 세기
+            setOpacity(); //최초에 보여질 첫번째 사각형 박스에 대한 처리함수 호출
+
+            setInterval("loop()", 10);
+
+            //키보드 이벤트 
+            document.body.addEventListener("keydown", function (e) {
+                switch (e.keyCode) {
+                    case 37: moveX(-1); break;
+                    case 39: moveX(1); break;
+                    case 38: moveY(-1); break;
+                    case 40: moveY(1); break;
+                }
+            });
+
+            keyword.addEventListener("keyup", function (e) {
+                if (e.keyCode == 13) {
+                    compare();
+                }
+            });
+
+
+
+        });
+    </script>
+</head>
+
+<body>
+
+    <div id="wrapper">
+        <div id="stage"></div>
+        <div id="side">
+            <h1>0 점</h1>
+            <h2>Level</h2>
+            <div id="hpBox"></div>
+            <button onClick="startGame()">start</button>
+            <input type="text" id="keyword" placeholder="정답입력">
+            <select name="" id="selectLevel" onChange="getLevelNum()">
+                <option value="">Level 선택</option>
+                <option value="4">Level 1(5X5)</option> <!--rectCount를 변수로 바꾸기-->
+                <option value="5">Level 2(6X6)</option>
+                <option value="7">Level 3(8X8)</option>
+            </select>
+            <div id="timeBox">00:30</div>
+        </div>
+    </div>
+</body>
+
+</html>
