@@ -88,7 +88,7 @@
         }
     </style>
     <script src="./Box.js"></script>
-    <script src="./GameTheme.js"></script>
+    <script src="./GameStage.js"></script>
     <script>
         let content;
         let side;
@@ -113,7 +113,6 @@
         let sec = 31;
         let st;
         let imgArray = [];
-        let stageArray = [];
 
 
 
@@ -303,14 +302,7 @@
             score = document.getElementById("score");
             stage = document.querySelector("h1");
             imgArray = document.querySelectorAll("#side img");
-            theme_p = document.getElementById("theme_p");
-            theme_f = document.getElementById("theme_f");
-            level1 = document.getElementById("level1");
-            level2 = document.getElementById("level2");
-            level3 = document.getElementById("level3");
 
-            stageArray.push(gameThemePeople);
-            stageArray.push(gameThemeFood);
         }
 
         addEventListener("load", function () {
@@ -355,10 +347,6 @@
             <img src="./images/pin.png"><img src="./images/pin.png"><img src="./images/pin.png"></br>
             <img src="./images/pin.png"><img src="./images/pin.png"><img src="./images/pin.png"><img
                 src="./images/pin.png">
-                <div>
-                    <button id="theme_p" onClick="createThemePeople()">인물
-                    <button id="theme_f" onClick="createThemeFood()">음식
-                </div>
             <button id="start_bt" onClick="start()">Start</button>
             <input type="text" id="answer">
             <input type="text" value="00:30" id="timer">
